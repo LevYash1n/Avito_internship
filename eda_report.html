@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang='ru'>
+<head>
+<meta charset='utf-8'>
+<meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>EDA — Avito query–item data</title>
+<style>
+:root{--bg:#08111f;--panel:#101827;--panel2:#172338;--text:#e5edf7;--muted:#94a3b8;--accent:#38bdf8;--accent2:#22c55e;--warn:#f59e0b;}
+*{box-sizing:border-box} body{margin:0;background:linear-gradient(135deg,#07101d,#101827 55%,#0b1525);color:var(--text);font:15px/1.55 'Segoe UI',Arial,sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:48px 24px 80px} h1{font-size:42px;line-height:1.1;margin:0 0 10px} h2{margin-top:42px;font-size:26px} h3{font-size:18px} .subtitle,.muted{color:var(--muted)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin:28px 0} .card{background:rgba(16,24,39,.92);border:1px solid #26354c;border-radius:15px;padding:18px} .card-label{color:var(--muted);font-size:13px} .card-value{font-size:27px;font-weight:750;color:#f8fafc;margin:3px 0} .card-note{font-size:12px;color:#718096}
+.callout{background:#13263a;border-left:4px solid var(--accent);border-radius:8px;padding:17px 19px;margin:22px 0} .warn{border-left-color:var(--warn)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:18px} .plot{width:100%;border:1px solid #26354c;border-radius:15px;background:#101827}
+.table-wrap{overflow:auto;border:1px solid #26354c;border-radius:12px} table{border-collapse:collapse;width:100%;background:#101827} th,td{padding:10px 12px;border-bottom:1px solid #26354c;text-align:left;white-space:nowrap} th{position:sticky;top:0;background:#172338;color:#bae6fd} tr:last-child td{border-bottom:none}
+code{background:#172338;padding:2px 6px;border-radius:5px} li{margin:7px 0} a{color:var(--accent)} footer{margin-top:48px;color:var(--muted);font-size:13px}
+@media(max-width:620px){h1{font-size:31px}.grid{grid-template-columns:1fr}.wrap{padding:28px 14px}}
+</style>
+</head>
+<body><main class='wrap'>
+<div class='subtitle'>Exploratory Data Analysis · 2026-09-27</div>
+<h1>Avito query–item data</h1>
+<p class='subtitle'>Профиль качества, структура взаимодействий и пересечение train/benchmark.</p>
+<section class='cards'><div class='card'><div class='card-label'>Строк train</div><div class='card-value'>497 673</div><div class='card-note'>наблюдений</div></div><div class='card'><div class='card-label'>Уникальных запросов</div><div class='card-value'>354 463</div><div class='card-note'>полных сигнатур</div></div><div class='card'><div class='card-label'>Уникальных объявлений</div><div class='card-value'>344 825</div><div class='card-note'>item_id в train</div></div><div class='card'><div class='card-label'>Повторных пар</div><div class='card-value'>6.15%</div><div class='card-note'>query–item observations</div></div><div class='card'><div class='card-label'>Benchmark item overlap</div><div class='card-value'>9.59%</div><div class='card-note'>по item_id</div></div><div class='card'><div class='card-label'>Benchmark query overlap</div><div class='card-value'>4.40%</div><div class='card-note'>по полной сигнатуре</div></div></section>
+<div class='callout warn'><strong>Главное ограничение:</strong> в предоставленных файлах нет label/оценки релевантности и временной метки. Train выглядит как набор наблюдавшихся query–item пар. Баланс классов, drift и честную supervised-валидацию по этим данным определить нельзя.</div>
+<h2>Данные</h2>
+<div class='table-wrap'><table><thead><tr><th>Таблица</th><th>Строк</th><th>Колонок</th><th>Размер</th></tr></thead><tbody><tr><td>benchmark_items</td><td>189 212</td><td>14</td><td>186.6 MB</td></tr><tr><td>benchmark_queries</td><td>2 452</td><td>6</td><td>124.4 KB</td></tr><tr><td>train</td><td>497 673</td><td>19</td><td>467.5 MB</td></tr></tbody></table></div>
+<h2>Ключевые результаты</h2>
+<ul>
+<li>30 619 дополнительных наблюдений уже встречавшейся query–item пары (6.15% строк).</li>
+<li>Категория query и item совпадает в 99.989% строк, location_id — в 83.10%.</li>
+<li>Benchmark overlap: 9.59% item_id, 4.40% полных query signatures, 37.32% нормализованных текстов.</li>
+<li><code>search_category=0</code>: 0.007% в train против 9.05% в benchmark queries — явный distribution shift.</li>
+<li><code>item_price=-1</code>: 32 631 строк train; это специальное значение, которое нельзя подавать модели как обычную отрицательную цену.</li>
+<li>В 71.99% проверенных пар запрос и title имеют общий токен; медианный query-token recall равен 0.500.</li>
+</ul>
+<div class='grid'>
+<img class='plot' src='eda_outputs/missingness.svg' alt='Пропуски'>
+<img class='plot' src='eda_outputs/benchmark_overlap.svg' alt='Пересечение benchmark'>
+<img class='plot' src='eda_outputs/frequency_distribution.svg' alt='Частоты'>
+<img class='plot' src='eda_outputs/text_overlap.svg' alt='Пересечение текста'>
+</div>
+<h2>Что делать дальше</h2>
+<ol>
+<li>Уточнить схему ground truth, candidate generation и целевую ranking-метрику.</li>
+<li>Дедуплицировать пары или превратить число повторов в вес.</li>
+<li>Валидироваться по группам query/item; отдельно измерять warm и cold-start.</li>
+<li>Начать с BM25/TF-IDF + структурных признаков, затем сравнить bi-encoder и cross-encoder reranking.</li>
+<li>Считать любые target/frequency aggregates строго внутри train-фолда.</li>
+</ol>
+<div class='callout'>Полный разбор, таблицы квантилей, проверка согласованности атрибутов и ограничения находятся в <a href='eda_report.md'>eda_report.md</a>. Машиночитаемые метрики — <a href='eda_outputs/metrics.json'>metrics.json</a>.</div>
+<footer>Сформировано скриптом <code>eda.py</code>. Все агрегаты точные, кроме query–title lexical overlap: детерминированная выборка до 100 000 строк, seed=42.</footer>
+</main></body></html>

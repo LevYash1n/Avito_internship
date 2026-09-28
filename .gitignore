@@ -1,0 +1,24 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+embedding_cache/
+
+# Local datasets and generated submissions
+*.parquet
+answer*.csv
+
+# Local secrets and notebook artifacts
+.env
+.env.*
+!.env.example
+.ipynb_checkpoints/
+
+# Personal transfer notes
+HANDOFF.md
