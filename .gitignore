@@ -22,3 +22,14 @@ answer*.csv
 
 # Personal transfer notes
 HANDOFF.md
+
+# Local experiment notes and generated EDA files
+eda_outputs/
+eda_report.md
+eda_report.html
+experiment_log.md
+experiments_description.txt
+main.py
+microcat_experiment.py
+microcat_retrieval_experiment.py
+title_rank_experiment.py
